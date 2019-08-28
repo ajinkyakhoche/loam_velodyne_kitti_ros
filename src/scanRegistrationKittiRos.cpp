@@ -830,11 +830,11 @@ int main(int argc, char** argv)
   
   std::string path = argv[1];//load path
   std::string sequence = argv[2];//load sequence
-  std::string file = path + "/data_odometry_velodyne/dataset/" + sequence + "/velodyne/" + getFrameStr(currentFrame) + ".bin";
+  std::string file = path + "/data_odometry_velodyne/dataset/sequences/" + sequence + "/velodyne/" + getFrameStr(currentFrame) + ".bin";
 
   FILE *stream;
   stream = fopen (file.c_str(),"rb");
-  //std::cout<<file<<std::endl;
+  std::cout<<"Ajinkya: file opened is: "<<file<<std::endl;
 
   std::string timesFileStr = path + "/data_odometry_calib/dataset/sequences/" + sequence + "/times.txt";
   std::ifstream timesFile(timesFileStr);
@@ -845,6 +845,8 @@ int main(int argc, char** argv)
 
   while(stream!=NULL)//read all .bin files in a sequence
   {
+          //std::cout<<"Ajinkya: entered while loop"<<std::endl;
+
 	  num = fread(data,sizeof(float),num,stream)/4;
 
 	  cloud.clear();
@@ -867,8 +869,8 @@ int main(int argc, char** argv)
 	  //reset variables to read a new sweep
 	  fclose(stream);
 	  currentFrame++;
-	  file = path + "/data_odometry_velodyne/dataset/" + sequence + "/velodyne/" + getFrameStr(currentFrame) + ".bin";
-	  //std::cout<<file<<std::endl;
+	  file = path + "/data_odometry_velodyne/dataset/sequences/" + sequence + "/velodyne/" + getFrameStr(currentFrame) + ".bin";
+	  std::cout<<file<<std::endl;
 	  fflush(stream);
 	  stream = fopen (file.c_str(),"rb");
 	  free(data);
