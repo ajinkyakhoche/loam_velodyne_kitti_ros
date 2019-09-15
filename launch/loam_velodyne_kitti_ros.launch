@@ -11,7 +11,8 @@
   <node pkg="loam_velodyne_kitti_ros" type="transformMaintenanceKittiRos" name="transformMaintenanceKittiRos" output="screen"/>
 
   <!--<node pkg="loam_velodyne_kitti_ros" type="record_loam_odometry_full.py" name="record_loam_odometry_full" output="screen"/>-->
-
+  <node pkg="loam_velodyne_kitti_ros" type="record_images.py" name="record_images" args="'/home/ajinkya/catkin_ws/src/KITTI-Odometry/data_odometry_color/dataset/sequences' 00" output="screen"/>
+  
   <group if="$(arg rviz)">
     <node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz" args="-d $(find loam_velodyne_kitti_ros)/rviz_cfg/loam_velodyne.rviz" />
   </group>
