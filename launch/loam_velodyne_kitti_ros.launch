@@ -2,7 +2,7 @@
 
   <arg name="rviz" default="true" />
 
-  <node pkg="loam_velodyne_kitti_ros" type="scanRegistrationKittiRos" name="scanRegistrationKittiRos" args="'/media/ajinkya/My Passport/KITTI-Odometry' 00" output="screen"/>
+  <node pkg="loam_velodyne_kitti_ros" type="scanRegistrationKittiRos" name="scanRegistrationKittiRos" args="'/home/ajinkya/catkin_ws/src/KITTI-Odometry' 00" output="screen"/>
 
   <node pkg="loam_velodyne_kitti_ros" type="laserOdometryKittiRos" name="laserOdometryKittiRos" output="screen" respawn="true">
   </node>

@@ -1057,7 +1057,7 @@ int main(int argc, char** argv)
           laserCloudSurround3.header.frame_id = "/camera_init";
           pubLaserCloudSurround.publish(laserCloudSurround3);
         }
-
+        
         int laserCloudFullResNum = laserCloudFullRes->points.size();
         for (int i = 0; i < laserCloudFullResNum; i++) {
           pointAssociateToMap(&laserCloudFullRes->points[i], &laserCloudFullRes->points[i]);
