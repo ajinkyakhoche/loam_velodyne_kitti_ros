@@ -12,7 +12,9 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
-  tf)
+  tf
+  image_transport
+  cv_bridge)
 
 find_package(PCL 1.8 REQUIRED)
 find_package(OpenCV REQUIRED)

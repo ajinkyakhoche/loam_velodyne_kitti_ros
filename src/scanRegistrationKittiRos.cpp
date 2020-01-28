@@ -35,6 +35,10 @@
 
 #include <loam_velodyne_kitti_ros/common.h>
 #include <opencv/cv.h>
+#include <image_transport/image_transport.h>
+#include <opencv2/highgui/highgui.hpp>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/Image.h>
 #include <nav_msgs/Odometry.h>
 #include <opencv/cv.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -123,6 +127,9 @@ ros::Publisher pubCornerPointsLessSharp;
 ros::Publisher pubSurfPointsFlat;
 ros::Publisher pubSurfPointsLessFlat;
 ros::Publisher pubImuTrans;
+
+// ros::Publisher pubImgLeft;
+image_transport::Publisher pubImgLeft;
 
 void ShiftToStartIMU(float pointTime)
 {
@@ -469,7 +476,7 @@ void extractFeatures(pcl::PointCloud<PointType>::Ptr laserCloud,
 }
 
 //void laserCloudHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudMsg)
-void laserCloudHandler(pcl::PointCloud<pcl::PointXYZ> laserCloudIn, double timeScanCur)
+void laserCloudHandler(pcl::PointCloud<pcl::PointXYZ> laserCloudIn, double timeScanCur, cv::Mat imgL)
 {
   if (!systemInited) {
     systemInitCount++;
@@ -731,7 +738,12 @@ void laserCloudHandler(pcl::PointCloud<pcl::PointXYZ> laserCloudIn, double timeS
   imuTransMsg.header.frame_id = "/camera";
   pubImuTrans.publish(imuTransMsg);
 
-
+  // publish left image
+  sensor_msgs::ImagePtr imgLMsg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", imgL).toImageMsg();
+  imgLMsg->header.stamp = stamp;
+  imgLMsg->header.frame_id = "/camera";
+  std::cout<<"inside function: "<<imgLMsg->data<<std::endl;
+  pubImgLeft.publish(imgLMsg);
 }
 
 void imuHandler(const sensor_msgs::Imu::ConstPtr& imuIn)
@@ -812,7 +824,10 @@ int main(int argc, char** argv)
 
   pubImuTrans = nh.advertise<sensor_msgs::PointCloud2> ("/imu_trans", 5);
 
+  image_transport::ImageTransport it(nh);
+  image_transport::Publisher pubImgLeft = it.advertise("/image_left", 2);
 
+  // pubImgLeft = nh.advertise<image_transport::ImageTransport> ("/image_left", 2);
 
   pcl::PointCloud<pcl::PointXYZ> cloud;
 
@@ -834,7 +849,8 @@ int main(int argc, char** argv)
 
   FILE *stream;
   stream = fopen (file.c_str(),"rb");
-  std::cout<<"Ajinkya: file opened is: "<<file<<std::endl;
+
+  std::cout<<"Ajinkya: Path to first Lidar data: "<<file<<std::endl;
 
   std::string timesFileStr = path + "/data_odometry_calib/dataset/sequences/" + sequence + "/times.txt";
   std::ifstream timesFile(timesFileStr);
@@ -842,6 +858,12 @@ int main(int argc, char** argv)
   double time;
 
   ros::Rate r(2); // 10 hz
+
+  // read left image
+  std::string imgLstr = path + "/data_odometry_color/dataset/sequences/" + sequence + "/image_2/" + getFrameStr(currentFrame) + ".png";
+  cv::Mat imgL = cv::imread(imgLstr, CV_LOAD_IMAGE_COLOR);
+  std::cout<<"Ajinkya: Path_image: "<<imgLstr<<" size: "<<imgL.size() <<std::endl;
+  cv::waitKey(1);
 
   while(stream!=NULL)//read all .bin files in a sequence
   {
@@ -864,7 +886,8 @@ int main(int argc, char** argv)
 	  getline (timesFile,timeStr);
 	  time = std::stof(timeStr);
 
-	  laserCloudHandler(cloud, (double)(time));
+	  // laserCloudHandler(cloud, (double)(time));
+    laserCloudHandler(cloud, (double)(time), imgL);
 
 	  //reset variables to read a new sweep
 	  fclose(stream);
@@ -880,6 +903,12 @@ int main(int argc, char** argv)
 	  py = data+1;
     pz = data+2;
     pr = data+3;
+
+    imgLstr = path + "/data_odometry_color/dataset/sequences/" + sequence + "/image_2/" + getFrameStr(currentFrame) + ".png";
+    // std::cout<<imgL.size()<<std::endl;
+    imgL = cv::imread(imgLstr, CV_LOAD_IMAGE_COLOR);
+    // cv::imshow( "Display window", imgL );                   // Show our image inside it.
+    cv::waitKey(1);
 
     r.sleep();
   }
